@@ -174,6 +174,14 @@ contract NvirLaunchpad is Ownable {
     return _a;
   }
 
+  function isContract(address _addr) internal view returns (bool) {
+    uint256 size;
+    assembly {
+      size := extcodesize(_addr)
+    }
+    return size > 0;
+  }
+
   function addStakedUser(address _user) internal {
     if (!stakedUserMap[_user]) {
       stakedUserMap[_user] = true;
@@ -259,10 +267,14 @@ contract NvirLaunchpad is Ownable {
   }
 
   // Allows the owner to unstake tokens for multiple users
-  function unstakeMulti(address[] memory _users) public {
+  function unstakeMulti(address[] memory _users) public onlyOwner {
     require(block.timestamp >= stakingEndTs, 'Staking is not ended');
 
     for (uint i = 0; i < _users.length; i++) {
+      if (isContract(_users[i])) {
+        continue;
+      }
+
       Position storage _pos = positions[_users[i]];
       if (_pos.isUnstaked) {
         continue;
@@ -372,11 +384,15 @@ contract NvirLaunchpad is Ownable {
   }
 
   // Allows the owner to claim vested tokens for multiple users
-  function releaseVestedTokensMulti(address[] memory _users) public {
+  function releaseVestedTokensMulti(address[] memory _users) public onlyOwner {
     require(block.timestamp >= saleEndTs, 'Sale is not ended');
     require(block.timestamp >= vestingStartTs, 'Vesting is not started');
 
     for (uint i = 0; i < _users.length; i++) {
+      if (isContract(_users[i])) {
+        continue;
+      }
+
       Position storage _pos = positions[_users[i]];
       if (_pos.stakingAmount == 0 || _pos.buyAmount == 0) {
         continue;
