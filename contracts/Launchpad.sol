@@ -44,9 +44,11 @@ pragma solidity ^0.8.20;
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/math/SafeCast.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 
 contract NvirLaunchpad is Ownable {
   using SafeCast for uint;
+  using SafeERC20 for IERC20;
 
   uint constant GU = 10 ** 18;
 
@@ -230,7 +232,7 @@ contract NvirLaunchpad is Ownable {
     require(saleToken.allowance(msg.sender, address(this)) >= _amount, 'Token allowance too low');
 
     saleTotalAmount += _amount;
-    saleToken.transferFrom(msg.sender, address(this), _amount);
+    saleToken.safeTransferFrom(msg.sender, address(this), _amount);
 
     emit SaleTokensDeposited(_amount);
   }
@@ -249,7 +251,7 @@ contract NvirLaunchpad is Ownable {
     _pos.stakingAmount += _amount;
     addStakedUser(msg.sender);
 
-    stakingToken.transferFrom(msg.sender, address(this), _amount);
+    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
 
     emit TokensStaked(msg.sender, _amount);
   }
@@ -264,7 +266,7 @@ contract NvirLaunchpad is Ownable {
     _pos.isUnstaked = true;
     removeStakedUser(_user);
 
-    stakingToken.transfer(_user, _pos.stakingAmount);
+    stakingToken.safeTransfer(_user, _pos.stakingAmount);
 
     emit TokensUnstaked(_user, _pos.stakingAmount);
   }
@@ -286,7 +288,7 @@ contract NvirLaunchpad is Ownable {
       _pos.isUnstaked = true;
       removeStakedUser(_users[i]);
 
-      stakingToken.transfer(_users[i], _pos.stakingAmount);
+      stakingToken.safeTransfer(_users[i], _pos.stakingAmount);
 
       emit TokensUnstaked(_users[i], _pos.stakingAmount);
     }
@@ -337,7 +339,7 @@ contract NvirLaunchpad is Ownable {
         purchaseToken.allowance(msg.sender, address(this)) >= _purchaseAmount,
         'Purchase token amount is not approved'
       );
-      purchaseToken.transferFrom(msg.sender, address(this), _purchaseAmount);
+      purchaseToken.safeTransferFrom(msg.sender, address(this), _purchaseAmount);
     }
 
     emit SaleParticipated(msg.sender, _amount);
@@ -381,7 +383,7 @@ contract NvirLaunchpad is Ownable {
     if (_pos.vestedAmount == _pos.buyAmount) {
       removeSoldUser(_user);
     }
-    saleToken.transfer(msg.sender, _vestingAmount);
+    saleToken.safeTransfer(msg.sender, _vestingAmount);
 
     emit TokensVested(msg.sender, _vestingAmount);
   }
@@ -413,7 +415,7 @@ contract NvirLaunchpad is Ownable {
       if (_pos.vestedAmount == _pos.buyAmount) {
         removeSoldUser(_users[i]);
       }
-      saleToken.transfer(_users[i], _vestingAmount);
+      saleToken.safeTransfer(_users[i], _vestingAmount);
 
       emit TokensVested(_users[i], _vestingAmount);
     }
@@ -431,11 +433,11 @@ contract NvirLaunchpad is Ownable {
     } else {
       // ERC-20
       _purchasedAmount = purchaseToken.balanceOf(address(this));
-      purchaseToken.transfer(owner(), _purchasedAmount);
+      purchaseToken.safeTransfer(owner(), _purchasedAmount);
     }
 
     uint _unsoldAmount = saleTotalAmount - soldTotalAmount;
-    saleToken.transfer(owner(), _unsoldAmount);
+    saleToken.safeTransfer(owner(), _unsoldAmount);
 
     emit SaleFinalized(_purchasedAmount, _unsoldAmount);
   }
