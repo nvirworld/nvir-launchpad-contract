@@ -100,7 +100,7 @@ describe('Standard', () => {
       await time.increaseTo(t + 200)
       // console.log(await lp.getMaxBuyAmount(alice.address))
       // console.log(await purchase.balanceOf(alice.address))
-      await lp.connect(alice).participateInSale(ethers.parseEther('2000'))
+      await lp.connect(alice).participateInSale(ethers.parseEther('20000'))
 
       expect(await purchase.balanceOf(alice.address)).to.equal(ethers.parseEther('80000'))
 

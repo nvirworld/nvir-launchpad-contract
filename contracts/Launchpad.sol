@@ -231,10 +231,14 @@ contract NvirLaunchpad is Ownable {
     require(saleToken.balanceOf(msg.sender) >= _amount, 'Insufficient token balance');
     require(saleToken.allowance(msg.sender, address(this)) >= _amount, 'Token allowance too low');
 
-    saleTotalAmount += _amount;
+    uint256 _before = stakingToken.balanceOf(address(this));
     saleToken.safeTransferFrom(msg.sender, address(this), _amount);
+    uint256 _after = stakingToken.balanceOf(address(this));
+    uint256 _depositAmount = _after - _before;
 
-    emit SaleTokensDeposited(_amount);
+    saleTotalAmount += _depositAmount;
+
+    emit SaleTokensDeposited(_depositAmount);
   }
 
   // Allows users to stake tokens within the staking period
@@ -248,12 +252,15 @@ contract NvirLaunchpad is Ownable {
     Position storage _pos = positions[msg.sender];
     require(_pos.stakingAmount + _amount <= stakingVolumeMax, 'Staking amount is too large');
 
-    _pos.stakingAmount += _amount;
+    uint256 _before = stakingToken.balanceOf(address(this));
+    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+    uint256 _after = stakingToken.balanceOf(address(this));
+    uint256 _stakingAmount = _after - _before;
+
+    _pos.stakingAmount += _stakingAmount;
     addStakedUser(msg.sender);
 
-    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
-
-    emit TokensStaked(msg.sender, _amount);
+    emit TokensStaked(msg.sender, _stakingAmount);
   }
 
   // Allows users to unstake their tokens after the staking period ends
@@ -319,30 +326,36 @@ contract NvirLaunchpad is Ownable {
     require(_pos.stakingAmount > 0, 'Your wallet is not staked');
     require(_pos.isUnstaked, 'Your wallet is not unstaked');
 
-    uint _maxBuyAmount = getMaxBuyAmount(msg.sender);
-    require(_pos.buyAmount + _amount <= _maxBuyAmount, 'Buy amount is too large');
+    require(_amount > 0, 'Purchase amount must be greater than zero');
 
-    uint _purchaseAmount = (_amount * salePrice) / GU;
-
-    _pos.buyAmount += _amount;
-    soldTotalAmount += _amount;
-    addSoldUser(msg.sender);
-
+    uint256 _purchaseAmount = 0;
     if (address(purchaseToken) == address(0)) {
       // ETH
-      require(msg.value == _purchaseAmount, 'Purchase amount is not matched');
+      require(msg.value == _amount, 'Purchase amount is not matched');
     } else {
       // ERC-20
       require(msg.value == 0, 'ETH should not be sent with ERC20 sale');
-      require(purchaseToken.balanceOf(msg.sender) >= _purchaseAmount, 'Purchase token amount is not enough');
-      require(
-        purchaseToken.allowance(msg.sender, address(this)) >= _purchaseAmount,
-        'Purchase token amount is not approved'
-      );
-      purchaseToken.safeTransferFrom(msg.sender, address(this), _purchaseAmount);
-    }
+      require(purchaseToken.balanceOf(msg.sender) >= _amount, 'Purchase token amount is not enough');
+      require(purchaseToken.allowance(msg.sender, address(this)) >= _amount, 'Purchase token amount is not approved');
 
-    emit SaleParticipated(msg.sender, _amount);
+      uint256 _before = purchaseToken.balanceOf(address(this));
+      purchaseToken.safeTransferFrom(msg.sender, address(this), _amount);
+      uint256 _after = purchaseToken.balanceOf(address(this));
+      _purchaseAmount = _after - _before;
+    }
+    require(_purchaseAmount > 0, 'Purchase amount must be greater than zero');
+
+    uint _buyAmount = (_purchaseAmount * GU) / salePrice;
+    require(_buyAmount > 0, 'Buy amount must be greater than zero');
+
+    uint _maxBuyAmount = getMaxBuyAmount(msg.sender);
+    require(_pos.buyAmount + _buyAmount <= _maxBuyAmount, 'Buy amount is too large');
+
+    _pos.buyAmount += _buyAmount;
+    soldTotalAmount += _buyAmount;
+    addSoldUser(msg.sender);
+
+    emit SaleParticipated(msg.sender, _buyAmount);
   }
 
   // Calculates the amount of tokens available for vesting for a user
