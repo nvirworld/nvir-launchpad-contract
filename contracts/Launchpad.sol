@@ -278,7 +278,7 @@ contract NvirLaunchpad is Ownable {
   }
 
   function getMaxBuyAmount(address _user) public view returns (uint) {
-    Position storage _pos = positions[_user];
+    Position memory _pos = positions[_user];
     if (_pos.stakingAmount == 0) {
       return 0;
     }
@@ -333,7 +333,7 @@ contract NvirLaunchpad is Ownable {
       return 0;
     }
 
-    Position storage _pos = positions[_user];
+    Position memory _pos = positions[_user];
     if (_pos.buyAmount == 0) {
       return 0;
     }
