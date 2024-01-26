@@ -48,9 +48,10 @@ import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 contract NvirLaunchpad is Ownable {
   using SafeCast for uint;
 
+  uint constant GU = 10 ** 18;
+
   // Public state variables
   string public name;
-  uint GU = 10 ** 18;
 
   // Staking related state variables
   IERC20 public stakingToken;
