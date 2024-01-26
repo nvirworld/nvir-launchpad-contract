@@ -54,32 +54,32 @@ contract NvirLaunchpad is Ownable {
   string public name;
 
   // Staking related state variables
-  IERC20 public stakingToken;
-  uint public stakingStartTs;
-  uint public stakingEndTs;
-  uint public stakingVolumeMax;
-  uint public stakingVolumeMin;
-  uint public stakingVolumeTier2;
-  uint public stakingVolumeTier3;
+  IERC20 public immutable stakingToken;
+  uint public immutable stakingStartTs;
+  uint public immutable stakingEndTs;
+  uint public immutable stakingVolumeMax;
+  uint public immutable stakingVolumeMin;
+  uint public immutable stakingVolumeTier2;
+  uint public immutable stakingVolumeTier3;
 
   // Token sale related state variables
-  uint public saleStartTs;
-  uint public saleEndTs;
-  uint public salePrice;
+  uint public immutable saleStartTs;
+  uint public immutable saleEndTs;
+  uint public immutable salePrice;
   uint public saleTotalAmount;
   uint public soldTotalAmount;
-  IERC20 public saleToken;
-  IERC20 public purchaseToken;
-  uint public saleRatioTier1;
-  uint public saleRatioTier2;
-  uint public saleRatioTier3;
+  IERC20 public immutable saleToken;
+  IERC20 public immutable purchaseToken;
+  uint public immutable saleRatioTier1;
+  uint public immutable saleRatioTier2;
+  uint public immutable saleRatioTier3;
   bool isSaleWhitelistEnabled;
   mapping(address => bool) saleWhitelist;
 
   // Vesting related state variables
-  uint public vestingStartTs;
-  uint public vestingPeriod;
-  uint public vestingRatio;
+  uint public immutable vestingStartTs;
+  uint public immutable vestingPeriod;
+  uint public immutable vestingRatio;
 
   // Struct to store user positions
   struct Position {
