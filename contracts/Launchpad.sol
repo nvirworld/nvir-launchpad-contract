@@ -407,7 +407,7 @@ contract NvirLaunchpad is Ownable {
       if (_vestingAmount == 0) {
         continue;
       }
-      if (_pos.vestedAmount + _vestingAmount >= _pos.buyAmount) {
+      if (_pos.vestedAmount + _vestingAmount > _pos.buyAmount) {
         continue;
       }
 
