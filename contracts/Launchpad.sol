@@ -316,6 +316,7 @@ contract NvirLaunchpad is Ownable {
       require(msg.value == _purchaseAmount, 'Purchase amount is not matched');
     } else {
       // ERC-20
+      require(msg.value == 0, 'ETH should not be sent with ERC20 sale');
       require(purchaseToken.balanceOf(msg.sender) >= _purchaseAmount, 'Purchase token amount is not enough');
       require(
         purchaseToken.allowance(msg.sender, address(this)) >= _purchaseAmount,
