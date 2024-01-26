@@ -240,6 +240,9 @@ contract NvirLaunchpad is Ownable {
     require(block.timestamp <= stakingStartTs, 'Staking only allowed before start time');
     require(_amount >= stakingVolumeMin, 'Staking amount is too small');
 
+    require(stakingToken.balanceOf(msg.sender) >= _amount, 'Insufficient token balance');
+    require(stakingToken.allowance(msg.sender, address(this)) >= _amount, 'Token allowance too low');
+
     Position storage _pos = positions[msg.sender];
     require(_pos.stakingAmount + _amount <= stakingVolumeMax, 'Staking amount is too large');
 
