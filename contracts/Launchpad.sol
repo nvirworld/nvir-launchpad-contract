@@ -136,7 +136,6 @@ contract NvirLaunchpad is Ownable {
     require(stakingStartTs < stakingEndTs, 'Staking start time must be earlier than end time');
     require(stakingVolumeMax > stakingVolumeMin, 'Staking volume max must be greater than min');
     require(stakingVolumeMin > 0, 'Staking volume min must be greater than zero');
-    require(0 <= stakingVolumeTier2, 'Staking volume tier2 must be greater than zero');
     require(stakingVolumeTier2 <= stakingVolumeTier3, 'Staking volume tier3 must be greater than or equal to tier2');
 
     saleStartTs = _saleStartEnd[0];
