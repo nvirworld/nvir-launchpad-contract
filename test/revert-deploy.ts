@@ -84,8 +84,8 @@ describe('DeployRevert', () => {
     })
 
     it('sale price > 0', async () => {
-      standardDeployArgs.salePrice = 0
-      await expect(deploy(deployer, standardDeployArgs)).to.be.revertedWith('Sale price must be greater than zero')
+      standardDeployArgs.salePrice = 10000000
+      await expect(deploy(deployer, standardDeployArgs)).to.be.revertedWith('Sale price must be greater than 10^(-10)')
     })
   })
 })

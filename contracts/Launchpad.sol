@@ -152,7 +152,7 @@ contract NvirLaunchpad is Ownable {
 
     require(stakingEndTs < saleStartTs, 'Staking end time must be earlier than sale start time');
     require(saleStartTs < saleEndTs, 'Sale start time must be earlier than end time');
-    require(salePrice > 0, 'Sale price must be greater than zero');
+    require(salePrice > 10 ** 8, 'Sale price must be greater than 10^(-10)');
     require(0 < saleRatioTier1, 'Sale ratio tier1 must be greater than zero');
     require(saleRatioTier1 <= saleRatioTier2, 'Sale ratio tier1 must be greater than or equal to tier2');
     require(saleRatioTier2 <= saleRatioTier3, 'Sale ratio tier2 must be greater than or equal to tier3');
