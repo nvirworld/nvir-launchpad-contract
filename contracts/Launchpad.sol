@@ -231,9 +231,9 @@ contract NvirLaunchpad is Ownable {
     require(saleToken.balanceOf(msg.sender) >= _amount, 'Insufficient token balance');
     require(saleToken.allowance(msg.sender, address(this)) >= _amount, 'Token allowance too low');
 
-    uint256 _before = stakingToken.balanceOf(address(this));
+    uint256 _before = saleToken.balanceOf(address(this));
     saleToken.safeTransferFrom(msg.sender, address(this), _amount);
-    uint256 _after = stakingToken.balanceOf(address(this));
+    uint256 _after = saleToken.balanceOf(address(this));
     uint256 _depositAmount = _after - _before;
 
     saleTotalAmount += _depositAmount;
@@ -315,7 +315,7 @@ contract NvirLaunchpad is Ownable {
   }
 
   // Allows users to participate in the token sale
-  function participateInSale(uint _amount) public payable {
+  function participateInSale(uint _purchaseAmount) public payable {
     require(block.timestamp >= saleStartTs && block.timestamp <= saleEndTs, 'Sale is not active');
 
     if (isSaleWhitelistEnabled) {
@@ -326,20 +326,22 @@ contract NvirLaunchpad is Ownable {
     require(_pos.stakingAmount > 0, 'Your wallet is not staked');
     require(_pos.isUnstaked, 'Your wallet is not unstaked');
 
-    require(_amount > 0, 'Purchase amount must be greater than zero');
+    require(_purchaseAmount > 0, 'Purchase amount must be greater than zero');
 
-    uint256 _purchaseAmount = 0;
     if (address(purchaseToken) == address(0)) {
       // ETH
-      require(msg.value == _amount, 'Purchase amount is not matched');
+      require(msg.value == _purchaseAmount, 'Purchase amount is not matched');
     } else {
       // ERC-20
       require(msg.value == 0, 'ETH should not be sent with ERC20 sale');
-      require(purchaseToken.balanceOf(msg.sender) >= _amount, 'Purchase token amount is not enough');
-      require(purchaseToken.allowance(msg.sender, address(this)) >= _amount, 'Purchase token amount is not approved');
+      require(purchaseToken.balanceOf(msg.sender) >= _purchaseAmount, 'Purchase token amount is not enough');
+      require(
+        purchaseToken.allowance(msg.sender, address(this)) >= _purchaseAmount,
+        'Purchase token amount is not approved'
+      );
 
       uint256 _before = purchaseToken.balanceOf(address(this));
-      purchaseToken.safeTransferFrom(msg.sender, address(this), _amount);
+      purchaseToken.safeTransferFrom(msg.sender, address(this), _purchaseAmount);
       uint256 _after = purchaseToken.balanceOf(address(this));
       _purchaseAmount = _after - _before;
     }
@@ -347,6 +349,7 @@ contract NvirLaunchpad is Ownable {
 
     uint _buyAmount = (_purchaseAmount * GU) / salePrice;
     require(_buyAmount > 0, 'Buy amount must be greater than zero');
+    require(soldTotalAmount + _buyAmount <= saleTotalAmount, 'Sold out');
 
     uint _maxBuyAmount = getMaxBuyAmount(msg.sender);
     require(_pos.buyAmount + _buyAmount <= _maxBuyAmount, 'Buy amount is too large');
