@@ -399,9 +399,9 @@ contract NvirLaunchpad is Ownable {
     if (_pos.vestedAmount == _pos.buyAmount) {
       removeSoldUser(_user);
     }
-    saleToken.safeTransfer(msg.sender, _vestingAmount);
+    saleToken.safeTransfer(_user, _vestingAmount);
 
-    emit TokensVested(msg.sender, _vestingAmount);
+    emit TokensVested(_user, _vestingAmount);
   }
 
   // Allows the owner to claim vested tokens for multiple users
